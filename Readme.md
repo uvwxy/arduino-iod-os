@@ -12,9 +12,9 @@ This project is
 
 My idea is
 
-- create tiny sensors (temp, hum, baro), and log data on a RaspberryPi
+- create tiny sensors (temperature, humidity, pressure), and log data on a RaspberryPi, like many others have already
 - to write some reusable code with C++
-- reuse this code with multiple projects
+- reuse this code (*mainly the OSViews*) with multiple projects
 - publish hardware design
 - publish backend
 - document everything
@@ -23,5 +23,5 @@ My idea is
 
 What works
 
-- display temparature, pressure, humidity
+- display temperature, pressure, humidity
 - display uptime, time (can fetch time from http)
