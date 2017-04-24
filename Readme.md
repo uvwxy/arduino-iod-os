@@ -1,5 +1,10 @@
 # Internet of Dingens Operating System
 
+## Click for Video
+[![IOD OS](https://img.youtube.com/vi/h6Gr7AzSxl0/0.jpg)](https://www.youtube.com/watch?v=h6Gr7AzSxl0)
+
+## Description
+
 This project is
 
 - hosted on GitHub as a backup 😎
