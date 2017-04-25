@@ -17,6 +17,7 @@
 #include <OSTextViews.h>
 #include <OSViewCycle.h>
 #include <OSSensors.h>
+#include <OSTimers.h>
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -93,6 +94,36 @@ bool clickUpdateTime(int id) {
   return true;
 }
 
+void tmrDraw() {
+  time.getUptimeStr(lblUpTime);
+  time.getUnixTimeStr(lblTime);
+
+  float2char(sensors.getTemp(), 1, lblTemp);
+  float2char(sensors.getPres(), 1, lblPres);
+  float2char(sensors.getHum(),  1, lblHum);
+
+  lblSignalStrength = getWifiStrength();
+
+  u8g2.clearBuffer();
+
+  rootView->draw(&u8g2);
+  u8g2.sendBuffer();
+}
+
+void tmrButtonClicks() {
+  buttons.handleButtonClicks();
+}
+
+void tmrPrintHeap() {
+  Serial.println(ESP.getFreeHeap());
+}
+
+void tmrReadSensors() {
+  sensors.readValues();
+}
+
+OSTimers *timers;
+
 void setup(void) {
   Serial.begin(9600);
 
@@ -143,30 +174,21 @@ void setup(void) {
   buttons.registerButtonClick(D4, &clickRootCycle);
   buttons.registerButtonClick(D3, &clickUpdateTime);
 
+  timers = new OSTimers();
+
+  timers->registerTimer(new OSTimer(&tmrButtonClicks, 100));
+  timers->registerTimer(new OSTimer(&tmrDraw, 500));
+  timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
+  timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 }
 
 void loop(void) {
-  time.tick();
-  time.getUptimeStr(lblUpTime);
-  time.getUnixTimeStr(lblTime);
+  unsigned long diff = time.tick();
 
-  sensors.readValues();
-  float2char(sensors.getTemp(), 1, lblTemp);
-  float2char(sensors.getPres(), 1, lblPres);
-  float2char(sensors.getHum(),  1, lblHum);
+  timers->checkTimers(diff);
 
-  lblSignalStrength = getWifiStrength();
-
-  buttons.handleButtonClicks();
-
-  u8g2.clearBuffer();
-
-  rootView->draw(&u8g2);
-  u8g2.sendBuffer();
-
-  Serial.println(ESP.getFreeHeap());
-
-  delay(1000);
+  delay(50);
 }

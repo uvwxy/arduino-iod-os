@@ -13,15 +13,15 @@ public:
                           int     seconds);
   unsigned long getUnixTime();
   void          setUnixTime(unsigned long t);
-  void          tick();
+  unsigned long tick();
 
 private:
 
-  unsigned long millisLast;
-  unsigned long uptimeSeconds;
-  unsigned long unixtime;
+  unsigned long _millisLast;
+  unsigned long _uptimeSeconds;
+  unsigned long _unixtime;
+  unsigned long _lastDelta;
   char *uptimeStr;
 };
-
 
 #endif // ifndef OSTime_h
