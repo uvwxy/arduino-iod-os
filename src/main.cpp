@@ -153,9 +153,9 @@ void loop(void) {
   time.getUnixTimeStr(lblTime);
 
   sensors.readValues();
-  sensors.toStr(sensors.getTemp(), 1, lblTemp);
-  sensors.toStr(sensors.getPres(), 1, lblPres);
-  sensors.toStr(sensors.getHum(),  1, lblHum);
+  float2char(sensors.getTemp(), 1, lblTemp);
+  float2char(sensors.getPres(), 1, lblPres);
+  float2char(sensors.getHum(),  1, lblHum);
 
   lblSignalStrength = getWifiStrength();
 

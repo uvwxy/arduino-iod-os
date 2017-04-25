@@ -9,16 +9,12 @@ public:
   OSSensors(bool  metric,
             float pressureUnit);
 
-  void  setup();
-  void  readValues();
-  float getPres();
-  float getTemp();
-  float getHum();
-  float getHeight();
-
-  void  toStr(float   f,
-              int     d,
-              char *& s);
+  void   setup();
+  void   readValues();
+  float  getPres();
+  float  getTemp();
+  float  getHum();
+  float  getHeight();
 
   char** getTempUnit();
   char** getHumUnit();

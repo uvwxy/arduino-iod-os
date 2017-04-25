@@ -10,4 +10,8 @@ static char* str2char(String s) {
   return result;
 }
 
+static void float2char(float f, int d, char *& str) {
+  strcpy(str, String(f, d).c_str());
+}
+
 #endif // ifndef OSHelper_h

@@ -38,10 +38,6 @@ OSSensors::OSSensors(bool metric, float pressureUnit) {
   }
 }
 
-void OSSensors::toStr(float f, int d, char *& str) {
-  strcpy(str, String(f, d).c_str());
-}
-
 char ** OSSensors::getAltUnit() {
   return &altUnit;
 }
