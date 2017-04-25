@@ -1,38 +1,57 @@
 #include <Arduino.h>
 #include <OSButtons.h>
 
-void OSButtons::setup() {
-  _button_map[0] = D3;
-  _button_map[1] = D4;
+void OSButtons::setup(int clickTimeout) {
+  _clickTimeout = clickTimeout;
 
+  _buttonMap[0] = D3;
+  _buttonMap[1] = D4;
+
+  for (int i = 0; i < MAX_BUTTONS; i++) {
+    _buttonLastState[i] = 0;
+  }
+
+  // TODO: move to root setup(), button mapping might change in the future
   pinMode(D3, INPUT);
   digitalWrite(D3, HIGH); // turn on pullup resistors
   pinMode(D4, INPUT);
   digitalWrite(D4, HIGH); // turn on pullup resistors
 }
 
-void handleClick(int pin, bool(*callbacks[])(int)) {
+void OSButtons::handleClick(int pin, int index) {
   bool consumed = false;
 
+  // button is active
   if (digitalRead(pin) == LOW) {
-    for (int i = 0; i < MAX_BUTTON_CALLBACKS; i++) {
-      if ((callbacks[i] != NULL) && !consumed) {
-        consumed = callbacks[i](pin);
+    // click is enabled (no timeout)
+    if (_buttonLastState[index] == 0) {
+      // set timeout
+      _buttonLastState[index] = _clickTimeout;
+
+      // send click event
+      for (int i = 0; i < MAX_BUTTON_CALLBACKS; i++) {
+        if ((_buttonCallbacks[index][i] != NULL) && !consumed) {
+          consumed = _buttonCallbacks[index][i](pin);
+        }
       }
+    } else if (_buttonLastState[index] > 0) {
+      // reduce timeout
+      _buttonLastState[index]--;
     }
   }
 }
 
 void OSButtons::handleButtonClicks() {
-  handleClick(D3, _buttonCallbacks[0]);
-  handleClick(D4, _buttonCallbacks[1]);
+  // TODO: similar as the todo in the setup, this could be more generic
+  handleClick(D3, 0);
+  handleClick(D4, 1);
 }
 
 int OSButtons::registerButtonClick(int pin, bool (*callback)(int)) {
   int index = -1;
 
   for (int i = 0; i < MAX_BUTTONS; i++) {
-    if (_button_map[i] == pin) {
+    if (_buttonMap[i] == pin) {
       index = i;
     }
   }

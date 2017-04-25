@@ -21,14 +21,21 @@
 class OSButtons {
 public:
 
-  void setup();
+  void setup(int clickTimeout);
   int  registerButtonClick(int    pin,
                            bool (*callback)(int));
   void handleButtonClicks();
 
+protected:
+
+  void handleClick(int pin,
+                   int index);
+
 private:
 
-  int _button_map[MAX_BUTTONS];
+  int _buttonMap[MAX_BUTTONS];
+  int _buttonLastState[MAX_BUTTONS];
+  int _clickTimeout = 3; // ticks
   bool(*_buttonCallbacks[MAX_BUTTONS][MAX_BUTTON_CALLBACKS])(int) = {};
 };
 

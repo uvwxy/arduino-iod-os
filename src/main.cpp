@@ -33,12 +33,13 @@ U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
                                             /* reset=*/ D6);
 
 OSTime time;
+OSTimers *timers;
+
 OSButtons buttons;
 OSSensors sensors(true, 1);
 
 OSViewCycle *rootView, *sensorViews;
 OSView *overlays;
-
 LargeUnitText *upTimeView, *tempView, *humView, *presView, *heightView, *timeView;
 
 char *lblEmpty = new char[1] { 0 };
@@ -77,23 +78,6 @@ char *lblHum  = new char[8];
 char *lblAlt  = new char[8];
 
 
-bool clickRootCycle(int id) {
-  return rootView->click(id);
-}
-
-bool clickUpdateTime(int id) {
-  u8g2.clearBuffer();
-  CornerText t(&lblWait, TOP_LEFT);
-  t.draw(&u8g2);
-  u8g2.sendBuffer();
-
-  WiFiClient client;
-
-  time.setUnixTime(webUnixTime(client) + (2 * 60 * 60));
-  Serial.println(time.getUnixTime());
-  return true;
-}
-
 void tmrDraw() {
   time.getUptimeStr(lblUpTime);
   time.getUnixTimeStr(lblTime);
@@ -122,7 +106,25 @@ void tmrReadSensors() {
   sensors.readValues();
 }
 
-OSTimers *timers;
+bool clickRootCycle(int id) {
+  bool ret = rootView->click(id);
+
+  tmrDraw();
+  return ret;
+}
+
+bool clickUpdateTime(int id) {
+  u8g2.clearBuffer();
+  CornerText t(&lblWait, TOP_LEFT);
+  t.draw(&u8g2);
+  u8g2.sendBuffer();
+
+  WiFiClient client;
+
+  time.setUnixTime(webUnixTime(client) + (2 * 60 * 60));
+  Serial.println(time.getUnixTime());
+  return true;
+}
 
 void setup(void) {
   Serial.begin(9600);
@@ -169,15 +171,15 @@ void setup(void) {
   rootView->addView(new LargeText(&lblEmpty));
 
   sensors.setup();
-  buttons.setup();
+  buttons.setup(5);
   buttons.registerButtonClick(D3, &clickRootCycle);
   buttons.registerButtonClick(D4, &clickRootCycle);
   buttons.registerButtonClick(D3, &clickUpdateTime);
 
   timers = new OSTimers();
 
-  timers->registerTimer(new OSTimer(&tmrButtonClicks, 100));
-  timers->registerTimer(new OSTimer(&tmrDraw, 500));
+  timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
+  timers->registerTimer(new OSTimer(&tmrDraw, 250));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
   timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
 
@@ -190,5 +192,5 @@ void loop(void) {
 
   timers->checkTimers(diff);
 
-  delay(50);
+  delay(20);
 }
