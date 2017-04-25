@@ -10,20 +10,32 @@ OSTime::OSTime() {
   tick();
 }
 
+/**
+ * Add all passed seconds (diffSeconds) to the counters. In most cases there are
+ * milliseconds left (deltaMillis) we need to add next time.
+ */
 void OSTime::tick() {
   unsigned long millisNow = millis();
+  unsigned long diffMillis = 0, diffSeconds = 0, deltaMillis = 0;
 
   if (millisLast < millisNow) {
-    int d = (millisNow - millisLast) / 1000;
-    uptimeSeconds += d;
-    unixtime      += d;
+    diffMillis  = millisNow - millisLast;
+    diffSeconds = diffMillis / 1000;
+    deltaMillis = diffMillis % 1000;
+
+    uptimeSeconds += diffSeconds;
+    unixtime      += diffSeconds;
   } else {
-    // special case
-    int d = (/*overflow*/ millisNow + /*rest*/ (ULONG_MAX - millisLast)) / 1000;
-    uptimeSeconds += d;
-    unixtime      += d;
+    // overflow case
+    diffMillis  = /*overflow*/ millisNow + /*rest*/ (ULONG_MAX - millisLast);
+    diffSeconds = diffMillis / 1000;
+    deltaMillis = diffMillis % 1000;
+
+    uptimeSeconds += diffSeconds;
+    unixtime      += diffSeconds;
   }
-  millisLast = millisNow;
+
+  millisLast = millisNow - deltaMillis;
 }
 
 void OSTime::get24hStr(char *& str, int seconds) {
