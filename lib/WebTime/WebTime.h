@@ -1,8 +1,7 @@
 #ifndef WebTime_h
 #define WebTime_h
 
-#include <Arduino.h>
-#include <WiFiClient.h>
+#include <WiFiClient.h> // avoid 'Client not declared', also is client used
 
 /*
  * © Francesco Potortì 2013 - GPLv3
@@ -51,27 +50,28 @@ unsigned long webUnixTime(Client& client)
 
       default:
 
-        if ((buf[0] == 'J') && (buf[1] == 'a')) daysInPrevMonths = 0;        // Jan
-        else if ((buf[0] == 'A') && (buf[1] == 'p')) daysInPrevMonths = 90;  // Apr
-        else switch (buf[2])
-          {
-          case 'r': daysInPrevMonths =  59; break;                           // Mar
+        if ((buf[0] == 'J') && (buf[1] == 'a')) {
+          daysInPrevMonths = 0;  // Jan
+        }
+        else if ((buf[0] == 'A') && (buf[1] == 'p')) {
+          daysInPrevMonths = 90; // Apr
+        }
+        else switch (buf[2]) {
+          case 'r':
+            daysInPrevMonths =  59; break; // Mar
 
-          case 'y': daysInPrevMonths = 120; break;                           // May
+          case 'y':
+            daysInPrevMonths = 120; break; // May
 
-          case 'n': daysInPrevMonths = 151; break;                           // Jun
+          case 'n':
+            daysInPrevMonths = 151; break; // Jun
 
-          case 'l': daysInPrevMonths = 181; break;                           // Jul
+          case 'l':
+            daysInPrevMonths = 181; break; // Jul
 
-          default:                                                           // add
-          // a
-          // default
-          // label
-          // here
-          // to
-          // avoid
-          // compiler
-          // warning
+          default:
+
+          // add a default label here to avoid compiler warning
           case 'g': daysInPrevMonths = 212; break; // Aug
           }
       }
@@ -84,8 +84,10 @@ unsigned long webUnixTime(Client& client)
       day += daysInPrevMonths;     // plus days for previous months this year
 
       if ((daysInPrevMonths >= 59) // if we are past February
-          && ((year & 3) == 0))    // and this is a leap year
+          && ((year & 3) == 0)) {  // and this is a leap year
         day += 1;                  // add one day
+      }
+
       // Remove today, add hours, minutes and seconds this month
       time = (((day - 1ul) * 24 + hour) * 60 + minute) * 60 + second;
     }
