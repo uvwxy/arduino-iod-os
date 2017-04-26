@@ -1,5 +1,5 @@
-#ifndef OSTextViews_h
-#define OSTextViews_h
+#ifndef TextViews_h
+#define TextViews_h
 
 #include <OSView.h>
 
@@ -69,4 +69,4 @@ private:
   BorderGravity _g;
 };
 
-#endif // ifndef OSTextViews_h
+#endif // ifndef TextViews_h

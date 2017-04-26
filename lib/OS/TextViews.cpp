@@ -1,4 +1,4 @@
-#include <OSTextViews.h>
+#include <TextViews.h>
 
 TextView::TextView(char **str) : OSView() {
   _str = str;

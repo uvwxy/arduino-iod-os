@@ -29,7 +29,7 @@ My idea is
 What works
 
 - display temperature, pressure, humidity (OSSensors.h)
-- simple UI to display uptime, time, sensors (OSView.h, OSTextViews.h, OSViewCycle.h)
+- simple UI to display uptime, time, sensors (OSView.h, TextViews.h, OSViewCycle.h)
 - proto threading (OSTimers.h)
 - button clicks (OSButtons.h)
 - time keeping (OSTime.h)
