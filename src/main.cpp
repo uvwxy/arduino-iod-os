@@ -41,7 +41,7 @@ OSSensors sensors(true, 1);
 
 OSViewCycle *rootView, *sensorViews;
 OSView *overlays;
-LargeUnitText *upTimeView, *tempView, *humView, *presView, *heightView, *timeView;
+LargeUnitText *upTimeView, *timeView;
 
 char *lblEmpty = new char[1] { 0 };
 char *lblTimeUnit = str2char("⏲");
@@ -128,10 +128,23 @@ bool clickUpdateTime(int id) {
 }
 
 void setup(void) {
+  // Setup interfaces/hardware
+
   Serial.begin(9600);
+
+  pinMode(D3, INPUT);
+  digitalWrite(D3, HIGH); // turn on pullup resistors
+  pinMode(D4, INPUT);
+  digitalWrite(D4, HIGH); // turn on pullup resistors
 
   u8g2.begin();
   u8g2.setContrast(0);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+
+  // Setup software
 
   overlays = new OSView();
   overlays->addView(new CornerText(&lblSignalStrength, TOP_LEFT));
@@ -139,15 +152,7 @@ void setup(void) {
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
   overlays->addView(new CornerText(&lblPresTrend, BOTTOM_LEFT));
 
-  // overlays->addView(new BorderText(&lblUpTime, TOP));
-  // overlays->addView(new BorderText(new String("(1)"), RIGHT));
-  // overlays->addView(new BorderText(new String("(2)"), BOTTOM));
-  // overlays->addView(new BorderText(new String("(3)"), LEFT));
-
   upTimeView = new LargeUnitText(&lblUpTime, &lblEmpty);
-  tempView   = new LargeUnitText(&lblTemp, sensors.getTempUnit());
-  humView    = new LargeUnitText(&lblHum, sensors.getHumUnit());
-  presView   = new LargeUnitText(&lblPres, sensors.getPresUnit());
 
   sensorViews = new OSViewCycle(D3);
   sensorViews->setOverlay(overlays);
@@ -159,9 +164,9 @@ void setup(void) {
   tv->addView(new BorderText(&lblSTime, BOTTOM));
   sensorViews->addView(tv);
 
-  sensorViews->addView(tempView);
-  sensorViews->addView(humView);
-  sensorViews->addView(presView);
+  sensorViews->addView(new LargeUnitText(&lblTemp, sensors.getTempUnit()));
+  sensorViews->addView(new LargeUnitText(&lblHum, sensors.getHumUnit()));
+  sensorViews->addView(new LargeUnitText(&lblPres, sensors.getPresUnit()));
 
   rootView = new OSViewCycle(D4);
 
@@ -183,9 +188,6 @@ void setup(void) {
   timers->registerTimer(new OSTimer(&tmrDraw, 250));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
   timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
 }
 
 void loop(void) {

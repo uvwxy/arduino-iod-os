@@ -12,10 +12,6 @@ void OSButtons::setup(int clickTimeout) {
   }
 
   // TODO: move to root setup(), button mapping might change in the future
-  pinMode(D3, INPUT);
-  digitalWrite(D3, HIGH); // turn on pullup resistors
-  pinMode(D4, INPUT);
-  digitalWrite(D4, HIGH); // turn on pullup resistors
 }
 
 void OSButtons::handleClick(int pin, int index) {
