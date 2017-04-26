@@ -41,7 +41,6 @@ OSSensors sensors(true, 1);
 
 OSViewCycle *rootView, *sensorViews;
 OSView *overlays;
-LargeUnitText *upTimeView, *timeView;
 
 char *lblEmpty = new char[1] { 0 };
 char *lblTimeUnit = str2char("⏲");
@@ -143,7 +142,6 @@ void setup(void) {
   WiFi.mode(WIFI_STA);
   WiFi.begin(WIFI_SSID, WIFI_PASS);
 
-
   // Setup software
 
   overlays = new OSView();
@@ -151,7 +149,6 @@ void setup(void) {
   overlays->addView(new CornerText(&lblWifiSSID, TOP_RIGHT));
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
   overlays->addView(new CornerText(&lblPresTrend, BOTTOM_LEFT));
-
 
   sensorViews = new OSViewCycle(D3);
   sensorViews->setOverlay(overlays);
