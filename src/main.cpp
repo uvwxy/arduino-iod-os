@@ -152,28 +152,21 @@ void setup(void) {
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
   overlays->addView(new CornerText(&lblPresTrend, BOTTOM_LEFT));
 
-  upTimeView = new LargeUnitText(&lblUpTime, &lblEmpty);
 
   sensorViews = new OSViewCycle(D3);
   sensorViews->setOverlay(overlays);
-
-  upTimeView->addView(new BorderText(&lblSUptime, BOTTOM));
-  sensorViews->addView(upTimeView);
-
-  LargeUnitText *tv = new LargeUnitText(&lblTime, &lblTimeUnit);
-  tv->addView(new BorderText(&lblSTime, BOTTOM));
-  sensorViews->addView(tv);
-
+  sensorViews->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
+                       ->addView(new BorderText(&lblSUptime, BOTTOM)));
+  sensorViews->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
+                       ->addView(new BorderText(&lblSTime, BOTTOM)));
   sensorViews->addView(new LargeUnitText(&lblTemp, sensors.getTempUnit()));
   sensorViews->addView(new LargeUnitText(&lblHum, sensors.getHumUnit()));
   sensorViews->addView(new LargeUnitText(&lblPres, sensors.getPresUnit()));
 
   rootView = new OSViewCycle(D4);
-
   rootView->addView(sensorViews);
-  timeView = new LargeUnitText(&lblTime, &lblTimeUnit);
-  timeView->addView(new CornerText(&lblBtnTime, TOP_RIGHT));
-  rootView->addView(timeView);
+  rootView->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
+                    ->addView(new CornerText(&lblBtnTime, TOP_RIGHT)));
   rootView->addView(new LargeText(&lblEmpty));
 
   sensors.setup();

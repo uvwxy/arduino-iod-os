@@ -15,7 +15,7 @@ class OSView {
 public:
 
   OSView();
-  int          addView(OSView *view);
+  OSView     * addView(OSView *view);
   bool         broadcastClick(int pin);
   virtual void draw(U8G2 *u8g2);
   virtual bool click(int pin) {

@@ -4,15 +4,15 @@
 
 OSView::OSView() {}
 
-int OSView::addView(OSView *view) {
+OSView * OSView::addView(OSView *view) {
   for (int i = 0; i < MAX_CHILD_VIEWS; i++) {
     if (_childViews[i] == NULL) {
       _childViews[i] = view;
       _childCount++;
-      return i;
+      break;
     }
   }
-  return -1;
+  return this;
 }
 
 bool OSView::broadcastClick(int pin) {
