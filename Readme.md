@@ -3,6 +3,18 @@
 ## Click for Video
 [![IOD OS](https://img.youtube.com/vi/h6Gr7AzSxl0/0.jpg)](https://www.youtube.com/watch?v=h6Gr7AzSxl0)
 
+## Building
+
+1. Install [Atom](https://atom.io) and [PlatformIO](http://platformio.org).
+2. Checkout this repository
+    1. `cd src`
+    2. `cp WiFiAuth.h.example WiFiAuth.h` and edit the `WIFI_SSID`, `WIFI_PASS` definitions
+3. `platformio lib install "U8g2"` to install dependencies
+
+Also don't forget to install the CH340g driver incase you have this USB chip instead of the FTDI to connect the ESP8266.
+
+See [here](http://kig.re/2014/12/31/how-to-use-arduino-nano-mini-pro-with-CH340G-on-mac-osx-yosemite.html).
+
 ## Description
 
 This project is
