@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+  <canvas id="canvas" width="128" height="64" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+  <script>
+    var draw = function(ctx, arr) {
+      console.log("Arr", arr);
+      var _x = 0;
+      var _y = 16; // offsets
+      var _width = 128;
+      var _height = 48
+
+      var minRange = 4;
+
+      // get first index and follower
+      var firstIndex = 0;
+      var nextIndex = 1;
+
+      var __min = Math.min.apply(Math, arr);
+
+      var temp = [];
+      var avg = 0;
+      for (var i = 0; i < arr.length; i++) {
+        temp[i] = arr[i] + (__min < 0 ? -__min : 0);
+        avg += arr[i];
+      }
+      avg = avg / arr.length;
+
+      var __max = Math.max.apply(Math, temp);
+      __min = __min < 0 ? 0 : __min;
+
+      console.log("b", __min, __max);
+      var range = __max - __min;
+      if (range < minRange) {
+        __max = __max + (minRange - range) / 2.;
+      }
+      console.log("a", __min, __max);
+
+      console.log("Max/Min", __max, __min);
+
+      for (var i = 1; i < temp.length; i++) {
+        // draw pair
+        drawLine(ctx, _x + (i - 1) / temp.length * _width,
+          _y + _height - _height * (temp[firstIndex] / __max),
+          _x + (i) / temp.length * _width,
+          _y + _height - _height * (temp[nextIndex] / __max));
+
+        // get next pair
+        firstIndex = nextIndex;
+        nextIndex = (firstIndex + 1) % temp.length;
+      }
+
+      drawFrame(ctx, _x, _y, _width, _height);
+
+    }
+
+
+
+    var data = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
+      0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
+      0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
+      0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
+    ]
+
+    var drawLine = function(ctx, x1, y1, x2, y2) {
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    };
+
+    var drawFrame = function(ctx, x1, y1, width, height) {
+      drawLine(ctx, x1, y1, x1, y1 + height);
+      drawLine(ctx, x1, y1, x1 + width, y1);
+      drawLine(ctx, x1 + width, y1 + height, x1, y1 + height);
+      drawLine(ctx, x1 + width, y1 + height, x1 + width, y1);
+    }
+
+    var c = document.getElementById("canvas");
+    var ctx = c.getContext("2d");
+
+    drawFrame(ctx, 0, 0, 128, 64);
+
+    draw(ctx, data);
+  </script>
+
+</body>
+
+</html>
