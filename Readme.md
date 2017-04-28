@@ -9,7 +9,6 @@
 2. Checkout this repository
     1. `cd src`
     2. `cp WiFiAuth.h.example WiFiAuth.h` and edit the `WIFI_SSID`, `WIFI_PASS` definitions
-3. `platformio lib install "U8g2"` to install dependencies
 
 Also don't forget to install the CH340g driver incase you have this USB chip instead of the FTDI to connect the ESP8266.
 
