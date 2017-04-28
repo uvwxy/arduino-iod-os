@@ -3,8 +3,21 @@
 
 <body>
 
-  <canvas id="canvas" width="128" height="64" style="border:1px solid #d3d3d3;">
+  <canvas id="canvas1" width="128" height="64" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
+
+  <canvas id="canvas2" width="128" height="64" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<canvas id="canvas3" width="128" height="64" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<canvas id="canvas4" width="128" height="64" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+<canvas id="canvas5" width="128" height="64" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
 
   <script>
     var draw = function(ctx, arr) {
@@ -20,38 +33,39 @@ Your browser does not support the HTML5 canvas tag.</canvas>
       var firstIndex = 0;
       var nextIndex = 1;
 
-      var __min = Math.min.apply(Math, arr);
 
-      var temp = [];
       var avg = 0;
       for (var i = 0; i < arr.length; i++) {
-        temp[i] = arr[i] + (__min < 0 ? -__min : 0);
         avg += arr[i];
       }
       avg = avg / arr.length;
 
-      var __max = Math.max.apply(Math, temp);
-      __min = __min < 0 ? 0 : __min;
+      var __min = Math.min.apply(Math, arr);
+      var __max = Math.max.apply(Math, arr);
 
-      console.log("b", __min, __max);
-      var range = __max - __min;
-      if (range < minRange) {
-        __max = __max + (minRange - range) / 2.;
-      }
-      console.log("a", __min, __max);
+      var shift = -__min;
+      var range = (__max+shift);
+      range = range == 0 ? 0.000000001 : range;
+      var drawRange = range < minRange ? minRange : range;
 
-      console.log("Max/Min", __max, __min);
 
-      for (var i = 1; i < temp.length; i++) {
+      console.log("Min/Max", __min, __max);
+      console.log("Range", range, drawRange);
+
+      for (var i = 1; i < arr.length; i++) {
+        var rm = (range/drawRange);
+        var ro = _height * (1.0-(range/drawRange))/2.0;
+
+        var x1 = (i - 1) / (arr.length-1) * _width;
+        var y1 = _height - _height * ((arr[firstIndex]+shift)/range)*rm-ro;
+        var x2 = (i) / (arr.length-1) * _width;
+        var y2 = _height - _height * ((arr[nextIndex]+shift)/range)*rm-ro;
         // draw pair
-        drawLine(ctx, _x + (i - 1) / temp.length * _width,
-          _y + _height - _height * (temp[firstIndex] / __max),
-          _x + (i) / temp.length * _width,
-          _y + _height - _height * (temp[nextIndex] / __max));
+        drawLine(ctx, _x + x1, _y + y1, _x + x2, _y + y2);
 
         // get next pair
         firstIndex = nextIndex;
-        nextIndex = (firstIndex + 1) % temp.length;
+        nextIndex = (firstIndex + 1) % arr.length;
       }
 
       drawFrame(ctx, _x, _y, _width, _height);
@@ -60,11 +74,16 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
 
 
-    var data = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
+    var data1 = [0.0, -0.1, 0.2, -0.3, 0.4, -0.5, 0.6, -0.7, //
       0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
-      0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, //
+      -0.0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, //
       0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
     ]
+    var data2 = [25, 26, 25, 26, 26, 25.5, 25.5];
+    var data3 = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0];
+
+    var data4 = [-25, -26, -25, -26, -26, -25.5, -25.5];
+    var data5 = [1.0,1.0,1.0,1.0,1.0,-1.0,1.0,1.0,1.0];
 
     var drawLine = function(ctx, x1, y1, x2, y2) {
       ctx.beginPath();
@@ -80,12 +99,12 @@ Your browser does not support the HTML5 canvas tag.</canvas>
       drawLine(ctx, x1 + width, y1 + height, x1 + width, y1);
     }
 
-    var c = document.getElementById("canvas");
-    var ctx = c.getContext("2d");
+    draw(document.getElementById("canvas1").getContext("2d"), data1);
+    draw(document.getElementById("canvas2").getContext("2d"), data2);
+    draw(document.getElementById("canvas3").getContext("2d"), data3);
+    draw(document.getElementById("canvas4").getContext("2d"), data4);
+    draw(document.getElementById("canvas5").getContext("2d"), data5);
 
-    drawFrame(ctx, 0, 0, 128, 64);
-
-    draw(ctx, data);
   </script>
 
 </body>
