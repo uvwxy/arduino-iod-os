@@ -33,24 +33,14 @@ Your browser does not support the HTML5 canvas tag.</canvas>
       var firstIndex = 0;
       var nextIndex = 1;
 
-
-      var avg = 0;
-      for (var i = 0; i < arr.length; i++) {
-        avg += arr[i];
-      }
-      avg = avg / arr.length;
-
       var __min = Math.min.apply(Math, arr);
       var __max = Math.max.apply(Math, arr);
 
       var shift = -__min;
       var range = (__max+shift);
+      // the 0.00000001 is to trick hlines into the middle
       range = range == 0 ? 0.000000001 : range;
       var drawRange = range < minRange ? minRange : range;
-
-
-      console.log("Min/Max", __min, __max);
-      console.log("Range", range, drawRange);
 
       for (var i = 1; i < arr.length; i++) {
         var rm = (range/drawRange);
@@ -79,7 +69,7 @@ Your browser does not support the HTML5 canvas tag.</canvas>
       -0.0, -0.1, -0.2, -0.3, -0.4, -0.5, -0.6, -0.7, //
       0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
     ]
-    var data2 = [25, 26, 25, 26, 26, 25.5, 25.5];
+    var data2 = [0, 0, 0, 26, 26, 25.5, 25.5];
     var data3 = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0];
 
     var data4 = [-25, -26, -25, -26, -26, -25.5, -25.5];
