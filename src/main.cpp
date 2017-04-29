@@ -19,6 +19,7 @@
 #include <OSTimers.h>
 
 #include <TextViews.h>
+#include <ChartViews.h>
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -42,6 +43,8 @@ OSSensors sensors(true, 1);
 OSViewCycle *rootView, *sensorViews;
 OSView *overlays;
 
+LineChart *tempLineChart;
+
 char *lblEmpty = new char[1] { 0 };
 char *lblTimeUnit = str2char("⏲");
 
@@ -60,14 +63,13 @@ char* getWifiStrength() {
   return lblSignalStrengths[index];
 }
 
-char *lblBtnTime   = str2char("⏲↻▶");
-char *lblWait      = str2char("⏳");
-char *lblButtonD3  = str2char("▶");
-char *lblButtonD4  = str2char("▼");
-char *lblPresTrend = str2char("☀");
-char *lblTime      = str2char("15:27:00");
-char *lblUpTime    = str2char("00:00:00");
-char *lblWifiSSID  = str2char(WIFI_SSID);
+char *lblBtnTime  = str2char("⏲↻▶");
+char *lblWait     = str2char("⏳");
+char *lblButtonD3 = str2char("▶");
+char *lblButtonD4 = str2char("▼");
+char *lblTime     = str2char("15:27:00");
+char *lblUpTime   = str2char("00:00:00");
+char *lblWifiSSID = str2char(WIFI_SSID);
 
 char *lblSUptime = str2char("Uptime");
 char *lblSTime   = str2char("Time");
@@ -89,7 +91,6 @@ void tmrDraw() {
   lblSignalStrength = getWifiStrength();
 
   u8g2.clearBuffer();
-
   rootView->draw(&u8g2);
   u8g2.sendBuffer();
 }
@@ -104,6 +105,7 @@ void tmrPrintHeap() {
 
 void tmrReadSensors() {
   sensors.readValues();
+  tempLineChart->addValue(sensors.getTemp());
 }
 
 bool clickRootCycle(int id) {
@@ -121,8 +123,7 @@ bool clickUpdateTime(int id) {
 
   WiFiClient client;
 
-  time.setUnixTime(webUnixTime(client) + (2 * 60 * 60));
-  Serial.println(time.getUnixTime());
+  time.setUnixTime(webUnixTime(client) + (2 * 60 * 60)); // UTC +2
   return true;
 }
 
@@ -148,10 +149,13 @@ void setup(void) {
   overlays->addView(new CornerText(&lblSignalStrength, TOP_LEFT));
   overlays->addView(new CornerText(&lblWifiSSID, TOP_RIGHT));
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
-  overlays->addView(new CornerText(&lblPresTrend, BOTTOM_LEFT));
+
+  tempLineChart = new LineChart(0, 16, 128, 48, 4.0);
 
   sensorViews = new OSViewCycle(D3);
   sensorViews->setOverlay(overlays);
+  sensorViews->addView(tempLineChart);
+
   sensorViews->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
                        ->addView(new BorderText(&lblSUptime, BOTTOM)));
   sensorViews->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
@@ -175,9 +179,10 @@ void setup(void) {
   timers = new OSTimers();
 
   timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
-  timers->registerTimer(new OSTimer(&tmrDraw, 250));
+  timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
-  timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
+
+  // timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
 }
 
 void loop(void) {
