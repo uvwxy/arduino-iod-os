@@ -40,10 +40,10 @@ OSTimers *timers;
 OSButtons buttons;
 OSSensors sensors(true, 1);
 
-OSViewCycle *rootView, *sensorViews;
+OSViewCycle *rootCycle, *tempCycle, *humCycle, *presCycle;
 OSView *overlays;
 
-LineChart *tempLineChart;
+LineChart *tempLineChart, *humLineChart, *presLineChart;
 
 char *lblEmpty = new char[1] { 0 };
 char *lblTimeUnit = str2char("⏲");
@@ -91,7 +91,7 @@ void tmrDraw() {
   lblSignalStrength = getWifiStrength();
 
   u8g2.clearBuffer();
-  rootView->draw(&u8g2);
+  rootCycle->draw(&u8g2);
   u8g2.sendBuffer();
 }
 
@@ -106,10 +106,12 @@ void tmrPrintHeap() {
 void tmrReadSensors() {
   sensors.readValues();
   tempLineChart->addValue(sensors.getTemp());
+  humLineChart->addValue(sensors.getHum());
+  presLineChart->addValue(sensors.getPres());
 }
 
 bool clickRootCycle(int id) {
-  bool ret = rootView->click(id);
+  bool ret = rootCycle->click(id);
 
   tmrDraw();
   return ret;
@@ -145,39 +147,54 @@ void setup(void) {
 
   // Setup software
 
+  rootCycle = new OSViewCycle(D3);
+  tempCycle = new OSViewCycle(D4);
+  humCycle  = new OSViewCycle(D4);
+  presCycle = new OSViewCycle(D4);
+
   overlays = new OSView();
   overlays->addView(new CornerText(&lblSignalStrength, TOP_LEFT));
-  overlays->addView(new CornerText(&lblWifiSSID, TOP_RIGHT));
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
 
+  rootCycle->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
+                     ->addView(new BorderText(&lblSUptime, BOTTOM))->addView(overlays));
+  rootCycle->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
+                     ->addView(new BorderText(&lblSTime, BOTTOM))
+                     ->addView(new CornerText(&lblBtnTime, BOTTOM_RIGHT))->addView(overlays));
+  rootCycle->addView(tempCycle);
+  rootCycle->addView(humCycle);
+  rootCycle->addView(presCycle);
+  rootCycle->addView(new LargeText(&lblEmpty));
+
+
+  // overlays->addView(new CornerText(&lblWifiSSID, TOP_RIGHT));
+  tempCycle->setOverlay(overlays);
+  humCycle->setOverlay(overlays);
+  presCycle->setOverlay(overlays);
+
+  tempCycle->addView(new LargeUnitText(&lblTemp, sensors.getTempUnit()));
+  humCycle->addView(new LargeUnitText(&lblHum, sensors.getHumUnit()));
+  presCycle->addView(new LargeUnitText(&lblPres, sensors.getPresUnit()));
+
   tempLineChart = new LineChart(0, 16, 128, 48, 4.0);
+  tempLineChart->addView(new CornerText(&lblTemp, TOP_RIGHT));
+  tempCycle->addView(tempLineChart);
 
-  sensorViews = new OSViewCycle(D3);
-  sensorViews->setOverlay(overlays);
-  sensorViews->addView(tempLineChart);
+  humLineChart = new LineChart(0, 16, 128, 48, 10.0);
+  humLineChart->addView(new CornerText(&lblHum, TOP_RIGHT));
+  humCycle->addView(humLineChart);
 
-  sensorViews->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
-                       ->addView(new BorderText(&lblSUptime, BOTTOM)));
-  sensorViews->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
-                       ->addView(new BorderText(&lblSTime, BOTTOM)));
-  sensorViews->addView(new LargeUnitText(&lblTemp, sensors.getTempUnit()));
-  sensorViews->addView(new LargeUnitText(&lblHum, sensors.getHumUnit()));
-  sensorViews->addView(new LargeUnitText(&lblPres, sensors.getPresUnit()));
-
-  rootView = new OSViewCycle(D4);
-  rootView->addView(sensorViews);
-  rootView->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
-                    ->addView(new CornerText(&lblBtnTime, TOP_RIGHT)));
-  rootView->addView(new LargeText(&lblEmpty));
+  presLineChart = new LineChart(0, 16, 128, 48, 10.0);
+  presLineChart->addView(new CornerText(&lblPres, TOP_RIGHT));
+  presCycle->addView(presLineChart);
 
   sensors.setup();
   buttons.setup(5);
   buttons.registerButtonClick(D3, &clickRootCycle);
   buttons.registerButtonClick(D4, &clickRootCycle);
-  buttons.registerButtonClick(D3, &clickUpdateTime);
+  buttons.registerButtonClick(D4, &clickUpdateTime);
 
   timers = new OSTimers();
-
   timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
   timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
