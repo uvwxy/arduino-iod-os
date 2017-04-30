@@ -21,6 +21,11 @@
 #include <TextViews.h>
 #include <ChartViews.h>
 
+#define BUILD_HASH "DEVELOP"
+#define BUILD_DATE "N/A"
+
+#include <BuildInfo.h>
+
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
 
