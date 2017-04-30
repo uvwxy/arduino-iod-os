@@ -8,6 +8,12 @@ void TextView::drawUTF8Str(U8G2 *u8g2, int x, int y, char *str) {
   u8g2->drawUTF8(x + offsetX, y + offsetY, str);
 }
 
+void TextView::draw(U8G2 *u8g2) {
+  u8g2->setFont(u8g2_font_unifont_t_symbols);
+  drawUTF8Str(u8g2, 0, 0, *_str);
+  OSView::draw(u8g2);
+}
+
 void TextView::setOffsetX(int x) {
   offsetX = x;
 }

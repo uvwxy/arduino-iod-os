@@ -7,7 +7,7 @@ class TextView : public OSView {
 public:
 
   TextView(char **str);
-  virtual void draw(U8G2 *u8g2) {}
+  virtual void draw(U8G2 *u8g2);
 
   void         drawUTF8Str(U8G2 *u8g2,
                            int   x,

@@ -1,6 +1,15 @@
+#ifndef DEBUG
+# include <BuildInfo.h>
+#else // ifdef EXT_BUILD
+# define BUILD_HASH "DEBUG"
+# define BUILD_DATE "0000-00-00"
+# define BUILD_TIME "00:00:00"
+#endif // ifdef EXT_BUILD
+
 #include "Arduino.h"
 #include <BME280I2C.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
 
 #include <WifiAuth.h>
 #include <WebTime.h>
@@ -21,13 +30,6 @@
 #include <TextViews.h>
 #include <ChartViews.h>
 
-#ifndef DEBUG
-# include <BuildInfo.h>
-#else // ifdef EXT_BUILD
-# define BUILD_HASH "DEBUG"
-# define BUILD_DATE "0000-00-00"
-# define BUILD_TIME "00:00:00"
-#endif // ifdef EXT_BUILD
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -83,13 +85,15 @@ char *lblTime     = str2char("15:27:00");
 char *lblUpTime   = str2char("00:00:00");
 char *lblWifiSSID = str2char(WIFI_SSID);
 
-char *lblSUptime = str2char("Uptime");
+char *lblSUpTime = str2char("Uptime");
 char *lblSTime   = str2char("Time");
 
 char *lblTemp = new char[8];
 char *lblPres = new char[8];
 char *lblHum  = new char[8];
 char *lblAlt  = new char[8];
+
+char *lblIp = str2char("000.000.000.000");
 
 
 void tmrDraw() {
@@ -101,6 +105,11 @@ void tmrDraw() {
   float2char(sensors.getHum(),  1, lblHum);
 
   lblSignalStrength = getWifiStrength();
+  String ip = String(WiFi.localIP()[0])
+              + "." + String(WiFi.localIP()[1])
+              + "." + String(WiFi.localIP()[2])
+              + "." + String(WiFi.localIP()[3]);
+  strcpy(lblIp, ip.c_str());
 
   u8g2.clearBuffer();
   rootCycle->draw(&u8g2);
@@ -141,6 +150,16 @@ bool clickUpdateTime(int id) {
   return true;
 }
 
+#include <index.html.h>
+
+ESP8266WebServer server(80);
+
+void handle_index() {
+  Serial.print("HTTP: / ");
+  server.send(200, "text/html", create_index_html());
+  Serial.println("200 OK");
+}
+
 void setup(void) {
   // Setup interfaces/hardware
 
@@ -169,17 +188,24 @@ void setup(void) {
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
 
   rootCycle->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
+                     ->addView(new BorderText(&lblSUpTime, BOTTOM))
                      ->addView(overlays)
-                     ->addView(new CornerText(&lblBuildDate, TOP_RIGHT))
-                     ->addView(new CornerText(&lblBuildTime, BOTTOM_RIGHT))
-                     ->addView(new CornerText(&lblBuildHash, BOTTOM_LEFT))
                      );
   rootCycle->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
                      ->addView(new BorderText(&lblSTime, BOTTOM))
-                     ->addView(new CornerText(&lblBtnTime, BOTTOM_RIGHT))->addView(overlays));
+                     ->addView(new CornerText(&lblBtnTime, BOTTOM_RIGHT))
+                     ->addView(overlays));
   rootCycle->addView(tempCycle);
   rootCycle->addView(humCycle);
   rootCycle->addView(presCycle);
+  TextView *infoView = new TextView(&lblIp);
+  infoView->setOffsetX(0);
+  infoView->setOffsetY(31);
+  rootCycle->addView(infoView //
+                     ->addView(new CornerText(&lblBuildDate, TOP_RIGHT))
+                     ->addView(new CornerText(&lblBuildTime, BOTTOM_RIGHT))
+                     ->addView(new CornerText(&lblBuildHash, BOTTOM_LEFT))
+                     ->addView(overlays));
   rootCycle->addView(new LargeText(&lblEmpty));
 
 
@@ -214,14 +240,18 @@ void setup(void) {
   timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
   timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
+  timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
 
-  // timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
+  server.on("/", handle_index);
+  server.begin();
 }
 
 void loop(void) {
   unsigned long diff = time.tick();
 
   timers->checkTimers(diff);
+
+  server.handleClient();
 
   delay(20);
 }
