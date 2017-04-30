@@ -21,10 +21,13 @@
 #include <TextViews.h>
 #include <ChartViews.h>
 
-#define BUILD_HASH "DEVELOP"
-#define BUILD_DATE "N/A"
-
-#include <BuildInfo.h>
+#ifndef DEBUG
+# include <BuildInfo.h>
+#else // ifdef EXT_BUILD
+# define BUILD_HASH "DEBUG"
+# define BUILD_DATE "0000-00-00"
+# define BUILD_TIME "00:00:00"
+#endif // ifdef EXT_BUILD
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -67,6 +70,10 @@ char* getWifiStrength() {
 
   return lblSignalStrengths[index];
 }
+
+char *lblBuildHash = str2char(BUILD_HASH);
+char *lblBuildDate = str2char(BUILD_DATE);
+char *lblBuildTime = str2char(BUILD_TIME);
 
 char *lblBtnTime  = str2char("⏲↻▶");
 char *lblWait     = str2char("⏳");
@@ -162,7 +169,11 @@ void setup(void) {
   overlays->addView(new CornerText(&lblButtonD4, BOTTOM_RIGHT));
 
   rootCycle->addView((new LargeUnitText(&lblUpTime, &lblEmpty))
-                     ->addView(new BorderText(&lblSUptime, BOTTOM))->addView(overlays));
+                     ->addView(overlays)
+                     ->addView(new CornerText(&lblBuildDate, TOP_RIGHT))
+                     ->addView(new CornerText(&lblBuildTime, BOTTOM_RIGHT))
+                     ->addView(new CornerText(&lblBuildHash, BOTTOM_LEFT))
+                     );
   rootCycle->addView((new LargeUnitText(&lblTime, &lblTimeUnit))
                      ->addView(new BorderText(&lblSTime, BOTTOM))
                      ->addView(new CornerText(&lblBtnTime, BOTTOM_RIGHT))->addView(overlays));
