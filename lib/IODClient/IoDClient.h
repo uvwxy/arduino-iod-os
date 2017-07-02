@@ -13,7 +13,8 @@ class IoDClient {
 public:
     IoDClient(const char *host, int port, const char *user, const char *pass, const char *sslFingerprint);
 
-    void post(String id, String data);
+    void post(String id, String value);
+    void postMulti(String id[], String values[]);
 
 private:
     const char *_host;

@@ -137,11 +137,9 @@ void tmrReadSensors() {
 void tmrIoDClient() {
   // TODO: refactor all values into single request
   if (WiFi.status() == WL_CONNECTED) {
-    iodClient.post(IOD_NODE_TEMP, String(sensors.getTemp(), 1));
-    delay(10 * 1000);
-    iodClient.post(IOD_NODE_HUM, String(sensors.getHum(), 1));
-    delay(10 * 1000);
-    iodClient.post(IOD_NODE_BARO, String(sensors.getPres(), 1));
+    String ids[]    = { IOD_NODE_TEMP, IOD_NODE_HUM, IOD_NODE_BARO };
+    String values[] = { String(sensors.getTemp(), 1), String(sensors.getHum(), 1), String(sensors.getPres(), 1) };
+    iodClient.postMulti(ids, values);
   }
 }
 

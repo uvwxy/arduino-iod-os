@@ -21,39 +21,35 @@ IoDClient::IoDClient(const char *host,
   _sslFingerprint = sslFingerprint;
 }
 
-void IoDClient::post(String id, String data) {
+void send(const char *host,
+          int         port,
+          String      user,
+          String      pass,
+          String      url,
+          String      sslFingerprint) {
   WiFiClientSecure client;
 
-  if (!client.connect(_host, _port)) {
-#ifndef DEBUG
-    Serial.println("client not connected");
-#endif // ifndef DEBUG
+  if (!client.connect(host, port)) {
+    #ifndef DEBUG
+    Serial.println("IoDClient not connected");
+    #endif // ifndef DEBUG
     return;
   }
 
-  String url = "/api/value/";
-  url += id;
-  url += "/0/"; // server based timestamp
-  url += data;
-
 #ifndef DEBUG
 
-  if (client.verify(_sslFingerprint, _host)) {
+  if (client.verify(sslFingerprint, host)) {
     // TODO
   } else {
     // TODO
   }
 #endif // ifndef DEBUG
 
-  String auth = _user;
-  auth += ":";
-  auth += _pass;
-
-
   client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-               "Host: " + _host + "\r\n" +
+               "Host: " + host + "\r\n" +
                "User-Agent: IODNodeESP8266\r\n" +
-               "Authorization: Basic " + base64::encode(auth) + "\r\n" +
+               "Authorization: Basic " + base64::encode(
+                 user + ":" + pass) + "\r\n" +
                "Connection: close\r\n\r\n");
 
 #ifndef DEBUG
@@ -68,8 +64,43 @@ void IoDClient::post(String id, String data) {
       break;
     }
   }
-
   Serial.println(client.readStringUntil('\n'));
 #endif // ifndef DEBUG
+
   client.stop();
+}
+
+void IoDClient::post(String id, String value) {
+  String url = "/api/value/";
+
+  url += id;
+  url += "/0/"; // server based timestamp
+  url += value;
+
+  send(_host, _port, _user, _pass, url, _sslFingerprint);
+}
+
+void IoDClient::postMulti(String ids[], String values[]) {
+  String id   = "";
+  String data = "";
+
+  for (int i = 0; i < ids->length(); i++) {
+    if (i > 0) ;
+    id += ",";
+    id += ids[i];
+  }
+
+  for (int i = 0; i < values->length(); i++) {
+    if (i > 0) ;
+    data += ",";
+    data += values[i];
+  }
+
+
+  String url = "/api/value/";
+  url += id;
+  url += "/0/"; // server based timestamp
+  url += data;
+
+  send(_host, _port, _user, _pass, url, _sslFingerprint);
 }
