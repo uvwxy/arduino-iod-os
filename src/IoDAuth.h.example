@@ -1,0 +1,5 @@
+#define IOD_HOST "my.iod.host.tld"
+#define IOD_PORT 8080
+#define IOD_USER "user"
+#define IOD_PASS "password"
+#define IOD_SSL_FINGERPRINT ""

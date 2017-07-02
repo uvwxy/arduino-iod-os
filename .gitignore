@@ -4,3 +4,4 @@
 .gcc-flags.json
 src/WiFiAuth.h
 src/BuildInfo.h
+IoDAuth.h

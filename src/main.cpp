@@ -30,6 +30,8 @@
 #include <TextViews.h>
 #include <ChartViews.h>
 
+#include <IoDClient.h>
+#include <IoDAuth.h>
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -44,7 +46,7 @@ U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
 
                                             /* reset=*/ D6);
 
-OSTime time;
+OSTime osTime;
 OSTimers *timers;
 
 OSButtons buttons;
@@ -95,10 +97,11 @@ char *lblAlt  = new char[8];
 
 char *lblIp = str2char("000.000.000.000");
 
+IoDClient iodClient(IOD_HOST, IOD_PORT, IOD_USER, IOD_PASS, IOD_SSL_FINGERPRINT);
 
 void tmrDraw() {
-  time.getUptimeStr(lblUpTime);
-  time.getUnixTimeStr(lblTime);
+  osTime.getUptimeStr(lblUpTime);
+  osTime.getUnixTimeStr(lblTime);
 
   float2char(sensors.getTemp(), 1, lblTemp);
   float2char(sensors.getPres(), 1, lblPres);
@@ -131,6 +134,8 @@ void tmrReadSensors() {
   presLineChart->addValue(sensors.getPres());
 }
 
+void tmrIoDClient() {}
+
 bool clickRootCycle(int id) {
   bool ret = rootCycle->click(id);
 
@@ -146,7 +151,7 @@ bool clickUpdateTime(int id) {
 
   WiFiClient client;
 
-  time.setUnixTime(webUnixTime(client) + (2 * 60 * 60)); // UTC +2
+  osTime.setUnixTime(webUnixTime(client) + (2 * 60 * 60)); // UTC +2
   return true;
 }
 
@@ -247,7 +252,7 @@ void setup(void) {
 }
 
 void loop(void) {
-  unsigned long diff = time.tick();
+  unsigned long diff = osTime.tick();
 
   timers->checkTimers(diff);
 
