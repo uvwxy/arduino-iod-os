@@ -26,7 +26,7 @@ void send(const char *host,
           String      user,
           String      pass,
           String      url,
-          String      sslFingerprint) {
+          const char *sslFingerprint) {
   WiFiClientSecure client;
 
   if (!client.connect(host, port)) {
@@ -36,7 +36,7 @@ void send(const char *host,
     return;
   }
 
-#ifndef DEBUG
+#ifdef DEBUG
 
   if (client.verify(sslFingerprint, host)) {
     // TODO
@@ -52,7 +52,7 @@ void send(const char *host,
                  user + ":" + pass) + "\r\n" +
                "Connection: close\r\n\r\n");
 
-#ifndef DEBUG
+#ifdef DEBUG
   Serial.println("request sent");
 
   while (client.connected()) {
@@ -83,16 +83,19 @@ void IoDClient::post(String id, String value) {
 void IoDClient::postMulti(String ids[], String values[], int n) {
   String id   = "";
   String data = "";
+  int    i    = 0;
 
-  for (int i = 0; i < n; i++) {
-    if (i > 0) ;
-    id += ",";
+  for (i = 0; i < n; i++) {
+    if (i > 0) {
+      id += ",";
+    }
     id += ids[i];
   }
 
-  for (int i = 0; i < n; i++) {
-    if (i > 0) ;
-    data += ",";
+  for (i = 0; i < n; i++) {
+    if (i > 0) {
+      data += ",";
+    }
     data += values[i];
   }
 

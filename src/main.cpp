@@ -32,6 +32,7 @@
 
 #include <IoDClient.h>
 #include <IoDAuth.h>
+#include <Settings.h>
 
 // Variables required for the display
 U8G2_SSD1306_128X64_NONAME_F_4W_SW_SPI u8g2(U8G2_R0,
@@ -97,6 +98,7 @@ char *lblAlt  = new char[8];
 
 char *lblIp = str2char("000.000.000.000");
 
+bool deepSleep = ENABLE_DEEP_SLEEP;
 IoDClient iodClient(IOD_HOST, IOD_PORT, IOD_USER, IOD_PASS, IOD_SSL_FINGERPRINT);
 
 void tmrDraw() {
@@ -136,12 +138,12 @@ void tmrReadSensors() {
 
 void tmrIoDClient() {
   if (WiFi.status() == WL_CONNECTED) {
-    String ids[] = { IOD_NODE_TEMP,
-                     IOD_NODE_HUM,
-                     IOD_NODE_BARO };
-    String values[] = { String(sensors.getTemp(),  1),
-                        String(sensors.getHum(),  1),
-                        String(sensors.getPres(), 1) };
+    String ids[3] = { IOD_NODE_TEMP,
+                      IOD_NODE_HUM,
+                      IOD_NODE_BARO };
+    String values[3] = { String(sensors.getTemp() + IOD_TEMP_CORRECTION,  1),
+                         String(sensors.getHum(),  1),
+                         String(sensors.getPres(), 1) };
     iodClient.postMulti(ids, values, 3);
     delay(3000); // I think this helps. Classic programming.
   }
@@ -176,10 +178,8 @@ void handle_index() {
   Serial.println("200 OK");
 }
 
-void setup(void) {
+void setupRunLevel1(void) {
   // Setup interfaces/hardware
-
-  Serial.begin(9600);
 
   pinMode(D3, INPUT);
   digitalWrite(D3, HIGH); // turn on pullup resistors
@@ -188,9 +188,6 @@ void setup(void) {
 
   u8g2.begin();
   u8g2.setContrast(0);
-
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
 
   // Setup software
 
@@ -253,7 +250,7 @@ void setup(void) {
   buttons.registerButtonClick(D4, &clickUpdateTime);
 
   timers = new OSTimers();
-  timers->registerTimer(new OSTimer(&tmrButtonClicks, 120));
+  timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
   timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
   timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
@@ -263,12 +260,81 @@ void setup(void) {
   server.begin();
 }
 
+void setup(void) {
+  // minimal setup
+  #ifdef DEBUG
+  Serial.begin(9600);
+  #endif // ifdef DEBUG
+
+  sensors.setup();
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+  if (!deepSleep) {
+    // setup directly
+    setupRunLevel1();
+  }
+}
+
+void runLevel0(void) {
+#ifdef DEBUG
+  Serial.println("Reading...");
+#endif // ifdef DEBUG
+
+  // wait and measure
+  delay(1 * 1000);
+  sensors.readValues();
+
+#ifdef DEBUG
+  Serial.println(String(sensors.getTemp(), 1));
+  Serial.println(String(sensors.getHum(), 1));
+  Serial.println(String(sensors.getPres(), 1));
+#endif // ifdef DEBUG
+
+  // send
+#ifdef DEBUG
+  Serial.println("Sending");
+#endif // ifdef DEBUG
+  tmrIoDClient();
+
+  // byebye (15 MINS)
+#ifdef DEBUG
+  Serial.println("ByeBye");
+#endif // ifdef DEBUG
+  ESP.deepSleep(DEEP_SLEEP_MINUTES  * 60 * 1000 * 1000, WAKE_RF_DEFAULT);
+}
+
 void loop(void) {
-  unsigned long diff = osTime.tick();
+  if (deepSleep) {
+    // give user time to press buttons or flash firmware
+    delay(500);
 
-  timers->checkTimers(diff);
+    if (digitalRead(D3) == LOW) {
+      // press D3 to wakeup device on start
+      deepSleep = false;
+#ifdef DEBUG
+      Serial.println("Booting run level 1...");
+#endif // ifdef DEBUG
 
-  server.handleClient();
+      // delayed setup
+      setupRunLevel1();
+    } else {
+#ifdef DEBUG
+      Serial.println("Run level 0...");
+#endif // ifdef DEBUG
+      runLevel0();
+    }
+  }
 
-  delay(100);
+  // this part is only reachable with deepSleep = false
+  if (!deepSleep) {
+    unsigned long diff = osTime.tick();
+
+    timers->checkTimers(diff);
+
+    server.handleClient();
+
+    delay(20);
+  }
 }
