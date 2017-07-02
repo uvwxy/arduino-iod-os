@@ -134,7 +134,18 @@ void tmrReadSensors() {
   presLineChart->addValue(sensors.getPres());
 }
 
-void tmrIoDClient() {}
+void tmrIoDClient() {
+  // TODO: refactor all values into single request
+  if (WiFi.status() == WL_CONNECTED) {
+    iodClient.post(IOD_NODE_TEMP, String(sensors.getTemp(), 1));
+    delay(10 * 1000);
+    iodClient.post(IOD_NODE_HUM, String(sensors.getHum(), 1));
+    delay(10 * 1000);
+    iodClient.post(IOD_NODE_BARO, String(sensors.getPres(), 1));
+  }
+}
+
+void tmrIoDClientTemp() {}
 
 bool clickRootCycle(int id) {
   bool ret = rootCycle->click(id);
@@ -246,6 +257,7 @@ void setup(void) {
   timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
   timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
+  timers->registerTimer(new OSTimer(&tmrIoDClient, 60 * 1000));
 
   server.on("/", handle_index);
   server.begin();

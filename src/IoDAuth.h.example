@@ -3,3 +3,7 @@
 #define IOD_USER "user"
 #define IOD_PASS "password"
 #define IOD_SSL_FINGERPRINT ""
+
+#define IOD_NODE_TEMP "1ed1ff7d_b33c_44b6_85eb_0ab7963db056"
+#define IOD_NODE_HUM "04c8e6af_dac9_45a2_9b73_e146c548e5b0"
+#define IOD_NODE_BARO "b8f5b943_a1c8_41b2_81f6_509944f57a4f"
