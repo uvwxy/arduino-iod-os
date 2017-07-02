@@ -80,24 +80,23 @@ void IoDClient::post(String id, String value) {
   send(_host, _port, _user, _pass, url, _sslFingerprint);
 }
 
-void IoDClient::postMulti(String ids[], String values[]) {
+void IoDClient::postMulti(String ids[], String values[], int n) {
   String id   = "";
   String data = "";
 
-  for (int i = 0; i < ids->length(); i++) {
+  for (int i = 0; i < n; i++) {
     if (i > 0) ;
     id += ",";
     id += ids[i];
   }
 
-  for (int i = 0; i < values->length(); i++) {
+  for (int i = 0; i < n; i++) {
     if (i > 0) ;
     data += ",";
     data += values[i];
   }
 
-
-  String url = "/api/value/";
+  String url = "/api/values/";
   url += id;
   url += "/0/"; // server based timestamp
   url += data;

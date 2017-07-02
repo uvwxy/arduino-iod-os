@@ -136,13 +136,16 @@ void tmrReadSensors() {
 
 void tmrIoDClient() {
   if (WiFi.status() == WL_CONNECTED) {
-    String ids[]    = { IOD_NODE_TEMP, IOD_NODE_HUM, IOD_NODE_BARO };
-    String values[] = { String(sensors.getTemp(), 1), String(sensors.getHum(), 1), String(sensors.getPres(), 1) };
-    iodClient.postMulti(ids, values);
+    String ids[] = { IOD_NODE_TEMP,
+                     IOD_NODE_HUM,
+                     IOD_NODE_BARO };
+    String values[] = { String(sensors.getTemp(),  1),
+                        String(sensors.getHum(),  1),
+                        String(sensors.getPres(), 1) };
+    iodClient.postMulti(ids, values, 3);
+    delay(3000); // I think this helps. Classic programming.
   }
 }
-
-void tmrIoDClientTemp() {}
 
 bool clickRootCycle(int id) {
   bool ret = rootCycle->click(id);
@@ -250,11 +253,11 @@ void setup(void) {
   buttons.registerButtonClick(D4, &clickUpdateTime);
 
   timers = new OSTimers();
-  timers->registerTimer(new OSTimer(&tmrButtonClicks, 25));
+  timers->registerTimer(new OSTimer(&tmrButtonClicks, 120));
   timers->registerTimer(new OSTimer(&tmrDraw, 500));
   timers->registerTimer(new OSTimer(&tmrReadSensors, 2500));
   timers->registerTimer(new OSTimer(&tmrPrintHeap, 5000));
-  timers->registerTimer(new OSTimer(&tmrIoDClient, 60 * 1000));
+  timers->registerTimer(new OSTimer(&tmrIoDClient, 15 * 60 * 1000));
 
   server.on("/", handle_index);
   server.begin();
@@ -267,5 +270,5 @@ void loop(void) {
 
   server.handleClient();
 
-  delay(20);
+  delay(100);
 }
