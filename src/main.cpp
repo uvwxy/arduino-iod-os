@@ -135,7 +135,6 @@ void tmrReadSensors() {
 }
 
 void tmrIoDClient() {
-  // TODO: refactor all values into single request
   if (WiFi.status() == WL_CONNECTED) {
     String ids[]    = { IOD_NODE_TEMP, IOD_NODE_HUM, IOD_NODE_BARO };
     String values[] = { String(sensors.getTemp(), 1), String(sensors.getHum(), 1), String(sensors.getPres(), 1) };
