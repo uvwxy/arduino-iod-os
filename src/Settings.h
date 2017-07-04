@@ -1,4 +1,4 @@
 #define ENABLE_DEEP_SLEEP true
 #define DEEP_SLEEP_MINUTES 15
 
-#define IOD_TEMP_CORRECTION -5.0f
+#define IOD_TEMP_CORRECTION 0.0f

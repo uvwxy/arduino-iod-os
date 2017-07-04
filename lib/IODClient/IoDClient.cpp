@@ -55,12 +55,24 @@ void send(const char *host,
 #ifdef DEBUG
   Serial.println("request sent");
 
+  int count = 0;
+
   while (client.connected()) {
+    count++;
     String line = client.readStringUntil('\n');
     Serial.println(line);
 
     if (line == "\r") {
+# ifdef DEBUG
       Serial.println("headers received");
+# endif // ifdef DEBUG
+      break;
+    }
+
+    if (count == 12) {
+# ifdef DEBUG
+      Serial.println("max reads from server reached, canceling");
+# endif // ifdef DEBUG
       break;
     }
   }

@@ -296,6 +296,14 @@ void runLevel0(void) {
 #ifdef DEBUG
   Serial.println("Sending");
 #endif // ifdef DEBUG
+
+  while (!WiFi.isConnected()) {
+#ifdef DEBUG
+    Serial.println("Waiting for network");
+#endif // ifdef DEBUG
+    delay(1 * 1000);
+  }
+
   tmrIoDClient();
 
   // byebye (15 MINS)

@@ -1,0 +1,14 @@
+{
+  "name": "IoD OS",
+  "keywords": "internet of things, time, timers, tick, charts, sensors, timers, view, ui, buttons",
+  "description": "A collection of components to create tiny IoT operating systems for the Arduino platform.",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/uvwxy/iod-os.git",
+    "branch": "master"
+  },
+  "frameworks": "arduino",
+  "platforms": "*",
+  "dependencies": ["BME280","U8g2"]
+}
